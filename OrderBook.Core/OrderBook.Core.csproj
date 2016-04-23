@@ -43,6 +43,7 @@
     <Compile Include="Model\Enums\OrderSide.cs" />
     <Compile Include="Model\Order.cs" />
     <Compile Include="Model\OrderBook.cs" />
+    <Compile Include="Model\ProcessedOrder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

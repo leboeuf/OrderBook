@@ -6,6 +6,9 @@ namespace OrderBook.Core.Model
     {
         public List<Order> Orders { get; set; }
 
-
+        public OrderBook()
+        {
+            Orders = new List<Order>();
+        }
     }
 }
