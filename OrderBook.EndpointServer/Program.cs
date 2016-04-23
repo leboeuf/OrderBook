@@ -1,6 +1,5 @@
 ﻿using OrderBook.Core.Model;
 using System;
-using System.Collections.Generic;
 using System.Messaging;
 
 namespace OrderBook.EndpointServer
@@ -12,23 +11,30 @@ namespace OrderBook.EndpointServer
         private const string MESSAGE_QUEUE_TX_NAME = @".\Private$\OrderBookServer_OrdersQueue";
         private static MessageQueue _rxMessageQueue;
         private static MessageQueue _txMessageQueue;
+        private const int LISTEN_PORT = 32000;
 
         static void Main(string[] args)
         {
             InitializeMessageQueues();
+            //StartListeningToProcessedOrders();
+            StartListeningToClients();
+        }
 
-            var order1 = new Core.Model.Order("TEST", Core.Model.Enums.OrderSide.Sell, 100, 10);
-            var order2 = new Core.Model.Order("TEST", Core.Model.Enums.OrderSide.Buy, 100, 10);
-
-            _txMessageQueue.Send(order1);
-            _txMessageQueue.Send(order2);
-
+        private static void StartListeningToProcessedOrders()
+        {
             while (true)
             {
                 var message = _rxMessageQueue.Receive();
                 var processedOrder = (ProcessedOrder)message.Body;
                 Console.WriteLine("Trade {0} executed at {1}.", processedOrder.Reference, processedOrder.TimestampExecuted);
             }
+        }
+
+        private static void StartListeningToClients()
+        {
+            var listener = new AsynchronousSocketListener(LISTEN_PORT);
+            // TODO: bind events
+            listener.StartListening();
         }
 
         private static void InitializeMessageQueues()

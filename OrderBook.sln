@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderBook.Core", "OrderBook
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderBook.EndpointServer", "OrderBook.EndpointServer\OrderBook.EndpointServer.csproj", "{2B7DAF0D-4400-420E-A5A5-8296F91701EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderBook.Client", "OrderBook.Client\OrderBook.Client.csproj", "{9B0918FE-F67A-4385-B2DB-BCD39420468A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2B7DAF0D-4400-420E-A5A5-8296F91701EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B7DAF0D-4400-420E-A5A5-8296F91701EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B7DAF0D-4400-420E-A5A5-8296F91701EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B0918FE-F67A-4385-B2DB-BCD39420468A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B0918FE-F67A-4385-B2DB-BCD39420468A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B0918FE-F67A-4385-B2DB-BCD39420468A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B0918FE-F67A-4385-B2DB-BCD39420468A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
