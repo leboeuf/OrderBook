@@ -24,9 +24,14 @@ namespace OrderBook.EndpointServer
     /// </remarks>
     public class AsynchronousSocketListener
     {
-        // Thread signal.
-        public ManualResetEvent allDone = new ManualResetEvent(false);
         private readonly int _listenPort;
+        public ManualResetEvent _allDone = new ManualResetEvent(false);
+
+        public delegate void OnClientConnectedEventHandler();
+        public event OnClientConnectedEventHandler OnClientConnected;
+
+        public delegate void OnReceiveCommandFromClientEventHandler(string message, Socket connection);
+        public event OnReceiveCommandFromClientEventHandler OnReceiveCommandFromClient;
 
         public AsynchronousSocketListener(int listenPort)
         {
@@ -39,7 +44,6 @@ namespace OrderBook.EndpointServer
             var ipAddress = ipHostInfo.AddressList[0];
             var localEndPoint = new IPEndPoint(ipAddress, _listenPort);
             var listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            
 
             // Bind the socket to the local endpoint and listen for incoming connections.
             try
@@ -50,14 +54,14 @@ namespace OrderBook.EndpointServer
                 while (true)
                 {
                     // Set the event to nonsignaled state.
-                    allDone.Reset();
+                    _allDone.Reset();
 
                     // Start an asynchronous socket to listen for connections.
                     Console.WriteLine("Waiting for a connection...");
                     listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
 
                     // Wait until a connection is made before continuing.
-                    allDone.WaitOne();
+                    _allDone.WaitOne();
                 }
 
             }
@@ -66,7 +70,7 @@ namespace OrderBook.EndpointServer
                 Console.WriteLine(e.ToString());
             }
 
-            Console.WriteLine("\nPress ENTER to continue...");
+            Console.WriteLine("\nPress any key to continue...");
             Console.Read();
 
         }
@@ -74,28 +78,32 @@ namespace OrderBook.EndpointServer
         public void AcceptCallback(IAsyncResult asyncResult)
         {
             // Signal the main thread to continue.
-            allDone.Set();
+            _allDone.Set();
 
             // Get the socket that handles the client request.
-            Socket listener = (Socket)asyncResult.AsyncState;
-            Socket handler = listener.EndAccept(asyncResult);
+            var listener = (Socket)asyncResult.AsyncState;
+            var connection = listener.EndAccept(asyncResult);
 
             // Create the state object.
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
+            var state = new StateObject();
+            state.workSocket = connection;
+
+            if (OnClientConnected != null)
+                OnClientConnected();
+
+            connection.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
         }
 
         public void ReadCallback(IAsyncResult asyncResult)
         {
-            String content = String.Empty;
+            var content = string.Empty;
 
-            // Retrieve the state object and the handler socket from the asynchronous state object.
-            StateObject state = (StateObject)asyncResult.AsyncState;
-            Socket handler = state.workSocket;
+            // Retrieve the state object and the connection socket from the asynchronous state object.
+            var state = (StateObject)asyncResult.AsyncState;
+            var connection = state.workSocket;
 
             // Read data from the client socket. 
-            int bytesRead = handler.EndReceive(asyncResult);
+            int bytesRead = connection.EndReceive(asyncResult);
 
             if (bytesRead > 0)
             {
@@ -106,26 +114,26 @@ namespace OrderBook.EndpointServer
                 content = state.sb.ToString();
                 if (content.IndexOf("\n") > -1)
                 {
-                    // All the data has been read from the client. Display it on the console.
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
+                    // All the data has been read from the client. 
+                    if (OnReceiveCommandFromClient != null)
+                        OnReceiveCommandFromClient(content, connection);
+
                     // Echo the data back to the client.
-                    Send(handler, content);
+                    Send(connection, content);
                 }
-                else
-                {
-                    // Not all data received. Get more.
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
-                }
+
+                // Either not all data received (no \n found) or we finished processing a command. Get more.
+                connection.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReadCallback), state);
             }
         }
 
-        private void Send(Socket handler, string data)
+        public void Send(Socket connection, string data)
         {
             // Convert the string data to byte data using ASCII encoding.
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
+            var byteData = Encoding.ASCII.GetBytes(data);
 
             // Begin sending the data to the remote device.
-            handler.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), handler);
+            connection.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), connection);
         }
 
         private void SendCallback(IAsyncResult asyncResult)
@@ -133,14 +141,14 @@ namespace OrderBook.EndpointServer
             try
             {
                 // Retrieve the socket from the state object.
-                Socket handler = (Socket)asyncResult.AsyncState;
+                var connection = (Socket)asyncResult.AsyncState;
 
                 // Complete sending the data to the remote device.
-                int bytesSent = handler.EndSend(asyncResult);
+                int bytesSent = connection.EndSend(asyncResult);
                 Console.WriteLine("Sent {0} bytes to client.", bytesSent);
 
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                //connection.Shutdown(SocketShutdown.Both);
+                //connection.Close();
 
             }
             catch (Exception e)
