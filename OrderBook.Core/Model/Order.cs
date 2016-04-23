@@ -3,6 +3,7 @@ using System;
 
 namespace OrderBook.Core.Model
 {
+    [Serializable]
     public class Order
     {
         public string Symbol { get; set; }
@@ -18,7 +19,7 @@ namespace OrderBook.Core.Model
             OrderSide = orderSide;
             Quantity = quantity;
             Price = price;
-            Reference = new Guid();
+            Reference = Guid.NewGuid();
             Timestamp = DateTime.UtcNow;
         }
     }

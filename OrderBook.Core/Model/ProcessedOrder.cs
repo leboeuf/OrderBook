@@ -3,6 +3,7 @@ using OrderBook.Core.Model.Enums;
 
 namespace OrderBook.Core.Model
 {
+    [Serializable]
     public class ProcessedOrder
     {
         public string Symbol { get; set; }
