@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using OrderBook.Client.ConsoleUtils;
 
 namespace OrderBook.Client
 {
@@ -10,10 +11,10 @@ namespace OrderBook.Client
     {
         private const int ORDERBOOK_ENDPOINTSERVER_PORT = 32000;
 
-        private static void Main(String[] args)
+        private static void Main(string[] args)
         {
-            System.Threading.Thread.Sleep(1000); // DEBUG: wait for server to be ready because server and client start at the same time when debugging
-
+            Console.WriteLine("Connecting...");
+            
             var iphostInfo = Dns.GetHostEntry(Dns.GetHostName());
             var ipAddress = iphostInfo.AddressList[0];
             var ipEndpoint = new IPEndPoint(ipAddress, ORDERBOOK_ENDPOINTSERVER_PORT);
@@ -27,13 +28,36 @@ namespace OrderBook.Client
                 StartListeningToServer(connection);
 
                 // Listen to console input
-                Console.WriteLine("Press any key to send an order to the server.");
+                ConsoleWindowManager.Initialize();
+                ConsoleWindowManager.Draw();
                 while (true)
                 {
-                    Console.ReadKey();
+                    byte[] messageToSend = null;
+                    var input = Console.ReadLine();
 
-                    var messageToSend = Encoding.ASCII.GetBytes("{\"o\": \"BUY\", \"q\": 100, \"s\": \"TEST\", \"p\": 10}\n");
-                    var bytesSent = connection.Send(messageToSend);
+                    switch (input)
+                    {
+                        case "1":
+                            messageToSend = Encoding.ASCII.GetBytes("{\"o\": \"SELL\", \"q\": 100, \"s\": \"TEST\", \"p\": 10}\n");
+                            break;
+                        case "2":
+                            messageToSend = Encoding.ASCII.GetBytes("{\"o\": \"BUY\", \"q\": 100, \"s\": \"TEST\", \"p\": 10}\n");
+                            break;
+                        case "3":
+                            messageToSend = Encoding.ASCII.GetBytes("{\"o\": \"SELL\", \"q\": 250, \"s\": \"TEST\", \"p\": 10}\n");
+                            break;
+                        case "4":
+                            messageToSend = Encoding.ASCII.GetBytes("{\"o\": \"BUY\", \"q\": 250, \"s\": \"TEST\", \"p\": 10}\n");
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (messageToSend != null)
+                    {
+                        var bytesSent = connection.Send(messageToSend);
+                    }
+                    
                 }
             }
             catch (Exception e)
