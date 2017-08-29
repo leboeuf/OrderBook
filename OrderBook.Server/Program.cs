@@ -71,7 +71,7 @@ namespace OrderBook.Server
             // Update timestamp to server time
             order.Timestamp = DateTime.UtcNow;
 
-            // Try to math the order
+            // Try to match the order
             var orderBook = _orderBooks[order.Symbol];
             var matches = orderBook.Orders
                 .Where(bookOrder => bookOrder.OrderSide != order.OrderSide

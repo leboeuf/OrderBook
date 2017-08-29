@@ -46,16 +46,14 @@ namespace OrderBook.EndpointServer
         private static void OnReceiveCommandFromClient(string message, Socket connection)
         {
             // message.length = number of bytes received
+
+            // TODO: this assumes the message is always well formed. Need to put some checks in place.
+            var order = JsonToOrderDeserializer.GetOrder(message);
+
             // Pass connection around to be able to send reponse to client
 
-            Console.WriteLine("This is a test, a command was recieved from the client.");
-            _clientListener.Send(connection, "This is a response");
-            System.Threading.Thread.Sleep(1000);
-            _clientListener.Send(connection, "This is a response2");
-            System.Threading.Thread.Sleep(1000);
-            _clientListener.Send(connection, "This is a response3");
-            System.Threading.Thread.Sleep(1000);
-            _clientListener.Send(connection, "This is a response4");
+            Console.WriteLine($"{order.Timestamp}: Got the following order: {order.OrderSide} {order.Quantity} {order.Symbol} @ {order.Price} (Ref #: {order.Reference})");
+            _clientListener.Send(connection, order.Reference.ToString());
         }
 
         private static void InitializeMessageQueues()
