@@ -29,6 +29,10 @@ namespace OrderBook.Client.ConsoleUtils
             helpConsole.Lines.Add("3: SELL  250 TEST @ 10");
             helpConsole.Lines.Add("4: BUY  250 TEST @ 10");
 
+            ordersConsole.Lines.Add("Accepted orders:");
+            ordersConsole.Lines.Add("");
+            ordersConsole.Lines.Add("Executed orders:");
+
             commandsConsole.Lines.Add("Enter your choice:");
 
             ConsoleRenderStack.Add(helpConsole);

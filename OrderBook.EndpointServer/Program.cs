@@ -18,17 +18,28 @@ namespace OrderBook.EndpointServer
         static void Main(string[] args)
         {
             InitializeMessageQueues();
-            //StartListeningToProcessedOrders();
+            //StartListeningToServerQueue();
             StartListeningToClients();
         }
 
-        private static void StartListeningToProcessedOrders()
+        private static void StartListeningToServerQueue()
         {
             while (true)
             {
                 var message = _rxMessageQueue.Receive();
-                var processedOrder = (ProcessedOrder)message.Body;
-                Console.WriteLine("Trade {0} executed at {1}.", processedOrder.Reference, processedOrder.TimestampExecuted);
+                if (message.Body is ProcessedOrder)
+                {
+                    var processedOrder = (ProcessedOrder)message.Body;
+                    Console.WriteLine("Trade {0} executed at {1}.", processedOrder.Reference, processedOrder.TimestampExecuted);
+                }
+
+                if (message.Body is Order)
+                {
+                    // The order can't be fulfilled at the moment and has been put in the order book
+                    var order = (Order)message.Body;
+                    //_clientListener.Send(connection, order.Reference.ToString());
+                }
+                
             }
         }
 

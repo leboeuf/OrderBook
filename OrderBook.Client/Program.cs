@@ -85,8 +85,14 @@ namespace OrderBook.Client
             while (true)
             {
                 var bytesRead = connection.Receive(data);
-                Console.WriteLine(Encoding.ASCII.GetString(data, 0, bytesRead));
+                var message = Encoding.ASCII.GetString(data, 0, bytesRead);
+                ProcessMessage(message);
             }
+        }
+
+        private static void ProcessMessage(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }

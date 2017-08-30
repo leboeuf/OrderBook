@@ -95,10 +95,16 @@ namespace OrderBook.Server
             {
                 // Put in order book if not matched
                 orderBook.Orders.Add(order);
+                BroadcastOrderAddedToOrderBook(order);
             }
         }
 
         private static void BroadcastProcessedOrder(ProcessedOrder order)
+        {
+            _txMessageQueue.Send(order);
+        }
+
+        private static void BroadcastOrderAddedToOrderBook(Order order)
         {
             _txMessageQueue.Send(order);
         }
